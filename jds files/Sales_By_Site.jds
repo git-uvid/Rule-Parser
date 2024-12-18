@@ -1,0 +1,32 @@
+VERSION(10;SCRIPT)
+VARIABLE_DECLARE(CubeName;"Sales_By_Site";"The name of the cube")
+
+CUBE_CREATE($CubeName;0;"Item","Site","Version","Week","SiteSplit_Measure") NO_ERROR
+
+ELEMENT_INVOKE("#_CELL_PROPERTIES_";"$Format";2) NO_ERROR
+
+CELL_REPLACE("#_#_CUBE_";"Audit",$CubeName,"~";"7")
+CELL_REPLACE("#_#_CUBE_";"MeasureDimension",$CubeName,"~";"SiteSplit_Measure")
+CELL_REPLACE("#_#_CUBE_";"TimeDimension",$CubeName,"~";"Week")
+VARIABLE_DEFINE(CellPropCubeName;"#_CELL_PROPERTIES_"+$CubeName)
+RULE_CREATE($CellPropCubeName;"['#_CELL_PROPERTIES_':'$Format'] = IF(EXIST('#_SiteSplit_Measure'['#_SiteSplit_Measure_':'$Format']), '#_SiteSplit_Measure'['#_SiteSplit_Measure_':'$Format'])";1;"<DYNAMICALLY GENERATED>";1;"";"";-1;;0) NO_ERROR
+RULE_REFRESH_TEMPLATES($CellPropCubeName)
+
+VARIABLE_DEFINE(CubeId220Name;$CubeName)
+RULE_CREATE($CubeId220Name;"['SiteSplit_Measure':'Alloc%', 'Site':'1', 'Version':'Forecast'] = B: 1 - ['Site':'2']";1;"['SiteSplit_Measure':'Alloc%', 'Site':'1', 'Version':'Forecast', 'Week'::'ForecastWeeks'] = B: 1 - ['Site':'2']";2;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId220Name;"['SiteSplit_Measure':'Quantity', 'Version':'Forecast', 'Week'::'ForecastWeeks'] = B:"
+"PALO.DATA("""",""Sales_Forecast"",""All_Customer"",!'Item',!'Version',!'Week',""Qty_H"") *"
+"(['SiteSplit_Measure':'Alloc%'])";0;"['PlantSplit_Measure':'Quantity', 'Version':'Forecast', 'Week'::'ForecastWeeks'] = B:"
+"PALO.DATA("""",""Sales_Forecast"",""All_Customer"",!'Item',!'Version',!'Week',""Quantity"") *"
+"(['PlantSplit_Measure':'Alloc%'])";3;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId220Name;"['SiteSplit_Measure':'Pounds', 'Version':'Forecast'] = B:"
+"['SiteSplit_Measure':'Quantity'] * VALUE(PALO.DATA("""", ""#_Item"", ""Net Weight"", !'Item'))";1;"Calculate Pounds - Allocated Qty * Net wt from Item Dimension";4;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId220Name;"['SiteSplit_Measure':'Units', 'Version':'Forecast'] = B:"
+"['SiteSplit_Measure':'Quantity'] * PALO.DATA("""",""#_Item"",""UnitsPerQTY"",!'Item')"
+"";1;"Calculate Units - Quantity * QtyPerUnit";5;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId220Name;"['SiteSplit_Measure':{'Quantity', 'Alloc%', 'Pounds', 'Units'}, 'Week'::'ForecastWeeks', 'Version':'Forecast_Only'] = B:['Version':'Forecast']";1;"**Added on 26-09-2024** Copy measures to different version to display only forecast measures in supply chain reports";1;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId220Name;"['SiteSplit_Measure':'Forecast_QtyH_Flag','Version':'Forecast'] = B:"
+"IF(PALO.DATA("""",""Sales_Forecast"",""All_Customer"",!'Item',!'Version',!'Week',""Qty_H"") <> 0, 1,null)";1;"**Added on 27-09** Flag the iem-->Customer-->Time-->Forecast with forecast numbers in the sales_forecast cube."
+"This is used in sales_by_Site report data filter";6;"";"";-1;;0) NO_ERROR
+RULE_REFRESH_TEMPLATES($CubeId220Name)
+

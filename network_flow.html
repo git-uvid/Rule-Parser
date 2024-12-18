@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "skyblue", "font": {"color": "black", "size": 16}, "font_size": 16, "id": "Sales_Forecast", "label": "Sales_Forecast", "shape": "dot", "size": 35, "title": "Flows: _T3 \u2192 Qty_H | All Measures \u2192 {\u002712MRR\u0027, \u00273MRR\u0027, \u00279MRR\u0027, \u00276MRR\u0027} | _T6 \u2192 Qty_H | _T12 \u2192 Qty_H | All Measures \u2192 :\u0027AllQuantity | Qty_H \u2192 Quantity_Alloc% | Quantity \u2192 ASP | _T9 \u2192 Qty_H | Quantity \u2192 Qty_H | Quantity_Alloc% \u2192 Quantity_Alloc%_Top | Quantity_Alloc% \u2192 Quantity_Alloc%_Final | GrossSales \u2192 Sales_H | Quantity_Alloc% \u2192 Qty_Alloc%_Applied | Promo_Approval_Status \u2192 {\u0027Forecast\u0027, \u0027Plan\u0027} | All Measures \u2192 PromoFlag | Total_Est_Cases \u2192 Promo_Qty", "type": "cube"}, {"color": "skyblue", "font": {"color": "black", "size": 16}, "font_size": 16, "id": "Sales_Actual", "label": "Sales_Actual", "shape": "dot", "size": 35, "title": "Flows: Quantity \u2192 Qty_H | GrossSales \u2192 Sales_H", "type": "cube"}, {"color": "skyblue", "font": {"color": "black", "size": 16}, "font_size": 16, "id": "Promotion", "label": "Promotion", "shape": "dot", "size": 35, "title": "Flows: Promo_Approval_Status \u2192 {\u0027Forecast\u0027, \u0027Plan\u0027} | Total_Est_Cases \u2192 Promo_Qty", "type": "cube"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "orange", "font": {"color": "black", "size": 14}, "font_size": 14, "from": "Sales_Forecast", "to": "Sales_Forecast", "width": 4}, {"arrows": "to", "color": "orange", "font": {"color": "black", "size": 14}, "font_size": 14, "from": "Sales_Actual", "to": "Sales_Forecast", "width": 4}, {"arrows": "to", "color": "orange", "font": {"color": "black", "size": 14}, "font_size": 14, "from": "Promotion", "to": "Sales_Forecast", "width": 4}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"barnesHut": {"theta": 0.75, "gravitationalConstant": -20000, "springLength": 320, "springConstant": 0.16, "avoidOverlap": 1}, "minVelocity": 0.75}, "nodes": {"shape": "dot", "scaling": {"min": 10, "max": 30}}, "edges": {"arrows": {"to": {"enabled": true}}, "smooth": {"enabled": true, "type": "dynamic"}}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

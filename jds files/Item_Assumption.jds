@@ -1,0 +1,24 @@
+VERSION(10;SCRIPT)
+VARIABLE_DECLARE(CubeName;"Item_Assumption";"The name of the cube")
+
+CUBE_CREATE($CubeName;0;"Customer","Item","Version","Item_Assmp_Measure") NO_ERROR
+
+ELEMENT_INVOKE("#_CELL_PROPERTIES_";"$Format";2) NO_ERROR
+
+VARIABLE_DEFINE(CellPropCubeName;"#_CELL_PROPERTIES_"+$CubeName)
+RULE_CREATE($CellPropCubeName;"['#_CELL_PROPERTIES_':'$Format'] = IF(EXIST('#_Item_Assmp_Measure'['#_Item_Assmp_Measure_':'$Format']), '#_Item_Assmp_Measure'['#_Item_Assmp_Measure_':'$Format'])";1;"<DYNAMICALLY GENERATED>";1;"";"";-1;;0) NO_ERROR
+RULE_REFRESH_TEMPLATES($CellPropCubeName)
+
+VARIABLE_DEFINE(CubeId112Name;$CubeName)
+RULE_CREATE($CubeId112Name;"['Item_Assmp_Measure':'WriteBack_Flag', 'Version':{'Forecast', 'Plan'}] = B:IF(AND(['Item_Assmp_Measure':'Delivered Price'] != null, ['Item_Assmp_Measure':'Source_Flag'] == null), 4, ['Item_Assmp_Measure':'Source_Flag'])";1;"";4;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Item_Assmp_Measure':'UserEntry_Flag'] = B:"
+"IF(['Item_Assmp_Measure':'WriteBack_Flag'] == 4 , 1,null)";1;"";5;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Item_Assmp_Measure':'Base_Unit_Cost(to account)', 'Version':{'Forecast', 'Plan'}] = B:IF(PALO.DATA("""", ""#_Item"", ""QtyPerUnit"", !'Item') != null, ['Item_Assmp_Measure':'Delivered Price'] / VALUE(PALO.DATA("""", ""#_Item"", ""Retail Units"", !'Item')), null)";1;"";1;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Item_Assmp_Measure':'Flag1', 'Version':{'Forecast', 'Plan'}] = B:if(['Item_Assmp_Measure':'WriteBack_Flag'] == 1, 1, null)";1;"";6;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Item_Assmp_Measure':'Flag2', 'Version':{'Forecast', 'Plan'}] = B:if(['Item_Assmp_Measure':'WriteBack_Flag'] == 2, 2, null)";1;"";7;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Item_Assmp_Measure':'Flag3', 'Version':{'Forecast', 'Plan'}] = B:if(['Item_Assmp_Measure':'WriteBack_Flag'] == 3, 3, null)";1;"";8;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Item_Assmp_Measure':'Flag4', 'Version':{'Forecast', 'Plan'}] = B:if(['Item_Assmp_Measure':'WriteBack_Flag'] == 4, 4, null)";1;"";9;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Version':'Plan_Only','Item_Assmp_Measure':{'FOB Price', 'Freight', 'Base_Cases','Source_Flag'}] = B:['Version':'Plan']";1;"";3;"";"";-1;;0) NO_ERROR
+RULE_CREATE($CubeId112Name;"['Version':'Forecast_Only','Item_Assmp_Measure':{'FOB Price', 'Freight', 'Base_Cases','Source_Flag'}] = B:['Version':'Forecast']";1;"";2;"";"";-1;;0) NO_ERROR
+RULE_REFRESH_TEMPLATES($CubeId112Name)
+
