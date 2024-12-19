@@ -7,9 +7,8 @@ import networkx as nx
 from pyvis.network import Network
 
 # Function to parse JDS file
-def parse_jds_file(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        content = file.read()  
+# Modified parse_jds_file to handle file content directly
+def parse_jds_file(content):
     cube_name_match = re.search(r'VARIABLE_DECLARE\(CubeName;"([^"]+)"', content)
     cube_name = cube_name_match.group(1) if cube_name_match else "Cube name not found."
     content = content.replace("NO_ERROR", "$NO_ERROR")
@@ -208,27 +207,29 @@ def visualize_graph(G, output_file, title, heading):
 
     st.components.v1.html(html_content, height=800)
 
-# Streamlit UI
 def main():
     st.title("Rules Visualizer")
-    jds_files = [f[:-4] for f in os.listdir("./jds files/") if f.endswith(".jds")]
-    if jds_files:
-        selected_file = st.selectbox("Select the Cube name:", jds_files)
-        if st.button("Generate Flow Visualization"):
-            if selected_file:
-                try:
-                    cube_name, rule_count, rule_df = parse_jds_file(f"./jds files/{selected_file}.jds")
-                    st.write(f"Cube name: {cube_name}, Rules found: {rule_count}")
-                    output_path = save_to_excel(rule_df, f"Modified_Rules.xlsx")
-                    output_file = parse_xls_to_modified_xls(selected_file)
-                    df = pd.read_excel(output_file)
-                    G, cube_nodes = create_graph_from_dataframe(df)
-                    visualize_graph(G, output_file, "Cube Data Flow", "Data Flow Between Cubes")
-                except Exception as e:
-                    st.error(f"Error: {e}")
-            else:
-                st.warning("Please select a file.")
+    st.write("This tool allows users to upload a JDS file and visualize the data flow between cubes through an interactive graph, helping users understand the connections between different measures and cubes.")
+
+    # File uploader widget to upload JDS file
+    uploaded_file = st.file_uploader("Upload a JDS file", type=["jds"])
+
+    if uploaded_file:
+        # Read the uploaded JDS file content
+        content = uploaded_file.read().decode("utf-8")
+        # Parse the uploaded file
+        try:
+            cube_name, rule_count, rule_df = parse_jds_file(content)
+            st.write(f"Cube name: {cube_name}, Rules found: {rule_count}")
+            output_path = save_to_excel(rule_df, "Modified_Rules.xlsx")
+            output_file = parse_xls_to_modified_xls(cube_name)
+            df = pd.read_excel(output_file)
+            G, cube_nodes = create_graph_from_dataframe(df)
+            visualize_graph(G, output_file, "Cube Data Flow", "Data Flow Between Cubes")
+        except Exception as e:
+            st.error(f"Error: {e}")
     else:
-        st.warning("No .jds files found in the 'jds files' directory.")
+        st.warning("Please upload a JDS file.")
+
 if __name__ == "__main__":
     main()
