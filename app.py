@@ -8,7 +8,7 @@ from pyvis.network import Network
 
 # Page configuration
 st.set_page_config(
-    page_title="Rules Parser",
+    page_title="Rules Parser and Visualizer",
     layout="wide"
 )
 
