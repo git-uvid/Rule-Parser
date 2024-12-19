@@ -24,7 +24,7 @@ st.markdown("""
             margin: 0px;
             line-height: 1.2;
             scroll-margin-top: 3.75rem;
-            font-size: 60px;
+            font-size: 55px;
             color: #273746;
             margin-bottom: 20px;
             font-weight: 900;
@@ -34,7 +34,7 @@ st.markdown("""
             word-break: break-word;
             margin: 0px 0px 1rem;
             padding: 0px;
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 600;}
     </style>
 """, unsafe_allow_html=True)
