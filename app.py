@@ -6,6 +6,12 @@ import os
 import networkx as nx
 from pyvis.network import Network
 
+# Page configuration
+st.set_page_config(
+    page_title="Rules Parser",
+    layout="wide"
+)
+
 # Function to parse JDS file
 # Modified parse_jds_file to handle file content directly
 def parse_jds_file(content):
