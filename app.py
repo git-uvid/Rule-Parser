@@ -12,6 +12,33 @@ st.set_page_config(
     layout="wide"
 )
 
+# .st-emotion-cache-pgf13w h1
+st.markdown("""
+    <style>
+        .st-emotion-cache-pgf13w h1{
+            scroll-margin-top: 3.75rem;
+            font-family: "Source Sans Pro", sans-serif;
+            font-weight: 700;
+            font-size: 2.75rem;
+            padding: 1.25rem 0px 1rem;
+            margin: 0px;
+            line-height: 1.2;
+            scroll-margin-top: 3.75rem;
+            font-size: 60px;
+            color: #273746;
+            margin-bottom: 20px;
+            font-weight: 900;
+            text-align: center;
+        }
+        .st-emotion-cache-nrabgc p{
+            word-break: break-word;
+            margin: 0px 0px 1rem;
+            padding: 0px;
+            font-size: 17px;
+            font-weight: 600;}
+    </style>
+""", unsafe_allow_html=True)
+
 # Function to parse JDS file
 # Modified parse_jds_file to handle file content directly
 def parse_jds_file(content):
